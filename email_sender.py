@@ -28,7 +28,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
-    stmp_server_address: str
+    smtp_server_address: str
     sender_email: str
     password: str
     port: int = 465
@@ -47,7 +47,7 @@ def login(request):
 
     @wraps(request)
     def wrapper(self, *args):
-        with smtplib.SMTP_SSL(self.cfg.stmp_server_address, self.cfg.port, context=self.cfg.context) as server:
+        with smtplib.SMTP_SSL(self.cfg.smtp_server_address, self.cfg.port, context=self.cfg.context) as server:
             server.login(self.cfg.sender_email, self.cfg.password)
             request(self, server, *args)
 
