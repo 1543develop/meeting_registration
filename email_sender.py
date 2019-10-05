@@ -21,9 +21,8 @@ Todo:
 """
 import smtplib
 import ssl
-from typing import List
-from functools import wraps
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -35,33 +34,13 @@ class Config:
     context: ssl.SSLContext = ssl.create_default_context()
 
 
-def login(request):
-    """
-    Decorator
-    Args:
-        request: request to server that will be executed after login
-
-    Returns:
-
-    """
-
-    @wraps(request)
-    def wrapper(self, *args):
-        with smtplib.SMTP_SSL(self.cfg.smtp_server_address, self.cfg.port, context=self.cfg.context) as server:
-            server.login(self.cfg.sender_email, self.cfg.password)
-            request(self, server, *args)
-
-    return wrapper
-
-
 class EmailSender:
     cfg: Config
 
     def __init__(self, stmp_server_address: str, sender_email: str, password: str):
         self.cfg = Config(stmp_server_address, sender_email, password)
 
-    @login
-    def send_mail_to_person(self, server: smtplib.SMTP_SSL, receiver_email: str, message: str):
+    def send_mail_to_person(self, receiver_email: str, message: str):
         """
         Function that sends email to single person
         Args:
@@ -72,7 +51,9 @@ class EmailSender:
         Returns:
 
         """
-        server.sendmail(self.cfg.sender_email, receiver_email, message)
+        with smtplib.SMTP_SSL(self.cfg.smtp_server_address, self.cfg.port, context=self.cfg.context) as server:
+            server.login(self.cfg.sender_email, self.cfg.password)
+            server.sendmail(self.cfg.sender_email, receiver_email, message)
 
     def send_mails_to_people(self, receiver_emails: List[str], message: str):
         """
