@@ -37,8 +37,8 @@ class Config:
 class EmailSender:
     cfg: Config
 
-    def __init__(self, stmp_server_address: str, sender_email: str, password: str):
-        self.cfg = Config(stmp_server_address, sender_email, password)
+    def __init__(self, smtp_server_address: str, sender_email: str, password: str):
+        self.cfg = Config(smtp_server_address, sender_email, password)
 
     def send_mail_to_person(self, receiver_email: str, message: str):
         """
