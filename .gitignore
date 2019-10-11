@@ -1,1 +1,3 @@
-meeting_registration/meeting_registration/settings.py
+config_secrets.json
+.idea
+meeting_registration/db.sqlite3
