@@ -8,6 +8,9 @@ class Student(models.Model):
     phone_number = models.CharField(max_length=100)
     email = models.EmailField()
 
+    class Meta:
+        ordering = ["grade", "student_name"]
+
     def __str__(self):
         return f"{self.name} {self.grade}"
 
@@ -22,5 +25,8 @@ class Teacher(models.Model):
     list_of_visitors = models.ManyToManyField(Student)
     workload = models.IntegerField()  # Three levels: 0 (<= 5), 1 (<=10), 2 (<=15)
 
+    class Meta:
+        ordering = ["name"]
+
     def __str__(self):
-        return f"{self.name} {self.list_of_grades}"
+        return self.name
