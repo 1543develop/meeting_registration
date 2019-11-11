@@ -8,8 +8,8 @@ class Student(models.Model):
     phone_number = models.CharField(max_length=100)
     email = models.EmailField()
 
-    class Meta:
-        ordering = ["grade", "student_name"]
+    # class Meta:
+    #     ordering = ["grade", "student_name"]
 
     def __str__(self):
         return f"{self.name} {self.grade}"
