@@ -5,19 +5,19 @@ from django.shortcuts import render
 from .forms import ContactForm, TeacherChoiceForm
 
 
-# import logging
-# logger = logging
 def registration(request):
-    teacher_choice_form_set = formset_factory(TeacherChoiceForm)
+    TeacherChoiceFormSet = formset_factory(TeacherChoiceForm, extra=1)
     if request.method == "POST":
         contact_form = ContactForm(request.POST, prefix="contacts")
-        teacher_choice_form_set = TeacherChoiceForm(request.POST, prefix="teachers")
-        print(contact_form.parent_name)
+        teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
+        a = contact_form.is_valid()
+        b = teacher_choice_form_set.is_valid()
+        a = contact_form.cleaned_data
+        b = teacher_choice_form_set.cleaned_data
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
-            print(contact_form, teacher_choice_form_set)
-            # return HttpResponseRedirect("/thanks/")
+            return HttpResponseRedirect("/thanks/")
     else:
         contact_form = ContactForm(prefix="contacts")
-        teacher_choice_form_set = teacher_choice_form_set(prefix="teachers")
+        teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set})

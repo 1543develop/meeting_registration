@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="container mt-3">
-    <form id="contacts_form" method="post">
+    <form method="post">
         {% csrf_token %}
         <div class="form-group">
             <label for="{{ contact_form.parent_name.id_for_label }}">Имя Родителя</label>
@@ -37,8 +37,6 @@
 {#            <input type="text" class="form-control" id="inputStudentName" aria-describedby="emailHelp"#}
 {#                   placeholder="Начните вводить ФИО">#}
         </div>
-    </form>
-    <form id="teachers_form" method="post">
         {% csrf_token %}
         {{ teacher_choice_form_set.management_form }}
         {% for teacher_choice_form in teacher_choice_form_set %}
@@ -49,8 +47,8 @@
 {#                       placeholder="Начните вводить ФИО">#}
             </div>
         {% endfor %}
+        <button type="submit" class="btn btn-primary" onclick="submitForms()">Отправить заявку</button>
     </form>
-    <button type="submit" class="btn btn-primary" onclick="submitForms()">Отправить заявку</button>
 </div>
 <!-- Optional JavaScript -->
 <script>
