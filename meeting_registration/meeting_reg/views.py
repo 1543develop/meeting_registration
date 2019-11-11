@@ -4,16 +4,21 @@ from django.shortcuts import render
 
 from .forms import ContactForm, TeacherChoiceForm
 
+data = {
+    # each form field data with a proper index form
+    'teachers-0-raw': 'my raw field string',
+
+    # form status, number of forms
+    'teachers-INITIAL_FORMS': 1,
+    'teachers-TOTAL_FORMS': 2,
+}
+
 
 def registration(request):
     TeacherChoiceFormSet = formset_factory(TeacherChoiceForm, extra=1)
     if request.method == "POST":
         contact_form = ContactForm(request.POST, prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
-        a = contact_form.is_valid()
-        b = teacher_choice_form_set.is_valid()
-        a = contact_form.cleaned_data
-        b = teacher_choice_form_set.cleaned_data
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
             return HttpResponseRedirect("/thanks/")
     else:
