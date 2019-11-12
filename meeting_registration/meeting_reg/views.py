@@ -10,7 +10,7 @@ data = {
 
     # form status, number of forms
     'teachers-INITIAL_FORMS': 1,
-    'teachers-TOTAL_FORMS': 2,
+    'teachers-TOTAL_FORMS': 1,
 }
 
 
@@ -20,6 +20,7 @@ def registration(request):
         contact_form = ContactForm(request.POST, prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
+            # contact_form.cleaned_data['parent_name']
             return HttpResponseRedirect("/thanks/")
     else:
         contact_form = ContactForm(prefix="contacts")

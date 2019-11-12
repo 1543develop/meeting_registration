@@ -15,6 +15,7 @@
 <body>
 <div class="container mt-3">
     <input type="button" value="Add More" id="add_more" onclick="add_fld()">
+    <input type="button" value="Delete last" id="del_more" onclick="del_fld()">
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -34,11 +35,13 @@
         </div>
         {% csrf_token %}
         {{ teacher_choice_form_set.management_form }}
-        <div id="form_set">
+        <div id="form_set" onchange="check_full()">
             {% for teacher_choice_form in teacher_choice_form_set %}
                 <div class="form-group">
                     <label for="inputTeacherName">{{ teacher_choice_form.teacher_name.label }}</label>
                     {{ teacher_choice_form.teacher_name }}
+                    <span class="form-control-clear glyphicon glyphicon-remove form-control-feedback hidden"></span>
+                    <button type="button" class="btn btn-primary" id="exampleButton1">Search</button>
                 </div>
             {% endfor %}
         </div>
@@ -50,19 +53,40 @@
         </div>
     </form>
 </div>
-<!-- Optional JavaScript -->
 <script>
     add_fld = function () {
-        var form_idx = $('#teachers-TOTAL_FORMS').val();
+        var form_idx = $('#id_teachers-TOTAL_FORMS').val();
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
-        $('#teachers-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+        $('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     };
+
+    del_fld = function () {
+        var form_idx = $('#id_teachers-TOTAL_FORMS').val();
+        if (form_idx > 1) {
+            $('#form_set div')[form_idx - 1].remove();
+            $('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) - 1);
+        }
+    };
+
+    check_full = function () {
+        var allGood = true;
+        $('#form_set').children('div').each(function () {
+            if ($(this).children('input').val() === '') {
+                allGood = false;
+            }
+        });
+        if (allGood) {
+            add_fld();
+        }
+    };
+
 
     submitForms = function () {
         document.getElementById("contacts_form").submit();
         document.getElementById("teachers_form").submit();
     };
 </script>
+<!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
