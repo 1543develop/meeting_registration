@@ -1,7 +1,9 @@
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-
+from django.core import serializers
+from json import loads
+from django.http.response import JsonResponse
 from .forms import ContactForm, TeacherChoiceForm
 
 data = {
@@ -27,3 +29,12 @@ def registration(request):
         teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set})
+
+
+def give_test_json(request):
+    return JsonResponse(loads("""[
+    { "id": 1, "name": "Матюхин Виктор Александрович Информатика" },
+    { "id": 2, "name": "Amazon AWS" },
+    { "id": 3, "name": "Docker" },
+    { "id": 4, "name": "Digital Ocean" }
+]"""), safe=False)

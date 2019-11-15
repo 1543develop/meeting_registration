@@ -13,9 +13,7 @@
     <title>Title</title>
 </head>
 <body>
-<div class="container mt-3">
-    <input type="button" value="Add More" id="add_more" onclick="add_fld()">
-    <input type="button" value="Delete last" id="del_more" onclick="del_fld()">
+<div class="container mt-3 pt-6">
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -35,24 +33,42 @@
         </div>
         {% csrf_token %}
         {{ teacher_choice_form_set.management_form }}
-        <div id="form_set" onchange="check_full()">
+        <div id="form_set">
             {% for teacher_choice_form in teacher_choice_form_set %}
                 <div class="form-group">
                     <label for="inputTeacherName">{{ teacher_choice_form.teacher_name.label }}</label>
-                    {{ teacher_choice_form.teacher_name }}
-                    <span class="form-control-clear glyphicon glyphicon-remove form-control-feedback hidden"></span>
-                    <button type="button" class="btn btn-primary" id="exampleButton1">Search</button>
+                    <div class="input-group teacher_name mb-3">
+                        {{ teacher_choice_form.teacher_name }}
+                        <div class="input-group-append">
+                            <button class="btn btn-danger del_this" type="button">Удалить</button>
+                        </div>
+                    </div>
                 </div>
             {% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary" onclick="submitForms()">Отправить заявку</button>
+        <button type="submit" class="btn btn-primary">Отправить заявку</button>
+        {#        <button type="button" value="Add More" id="add_more" onclick="add_fld()">#}
+        {#        <button type="button" value="Delete last" id="del_more" onclick="del_last()">#}
         <div id="empty_form" style="display: none">
             <div class="form-group">
-                {{ teacher_choice_form_set.empty_form }}
+                <label for="inputTeacherName">{{ teacher_choice_form_set.empty_form.teacher_name.label }}</label>
+                <div class="input-group teacher_name mb-3">
+                    {{ teacher_choice_form_set.empty_form.teacher_name }}
+                    <div class="input-group-append">
+                        <button class="btn btn-danger shadow-none del_this" type="button">Удалить</button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>
+    <div class="footer pt-4"></div>
 </div>
+<script
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+{% load static %}
+<script src="{% static 'js/bootstrap3-typeahead.js' %}"></script>
 <script>
     add_fld = function () {
         var form_idx = $('#id_teachers-TOTAL_FORMS').val();
@@ -60,19 +76,21 @@
         $('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     };
 
-    del_fld = function () {
+    del_last = function () {
         var form_idx = $('#id_teachers-TOTAL_FORMS').val();
         if (form_idx > 1) {
-            $('#form_set div')[form_idx - 1].remove();
-            $('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) - 1);
+            $('#form_set .form-group').last().remove();
+            {#$('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) - 1);#}
         }
     };
 
     check_full = function () {
         var allGood = true;
         $('#form_set').children('div').each(function () {
-            if ($(this).children('input').val() === '') {
-                allGood = false;
+            if ($(this).find('div.teacher_name input').val() === '') {
+                if ($('#form_set').lastChild !== $(this)) {
+                    $(this).remove();
+                }
             }
         });
         if (allGood) {
@@ -80,17 +98,37 @@
         }
     };
 
+    $.ajax({
+        url: 'http://127.0.0.1:8000/test',
+        type: 'get', // This is the default though, you don't actually need to always mention it
+        success: function (data) {
+            console.log(data);
+            $(".basic").typeahead({
+                source: data,
+            });
+        }
+    });
 
-    submitForms = function () {
-        document.getElementById("contacts_form").submit();
-        document.getElementById("teachers_form").submit();
-    };
+
+    $(document).ready(function () {
+
+        {#console.log(a)#}
+
+        $('#form_set').on('change', check_full);
+
+
+        $('#form_set').on("click", '.del_this', function () {
+            var block = $(this).parent().parent().parent();
+            var form_set_length = block.parent().children().length;
+            if (block.index() + 1 !== form_set_length && form_set_length !== 1) {
+                block.remove();
+            }
+        })
+
+    });
 </script>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
         crossorigin="anonymous"></script>
