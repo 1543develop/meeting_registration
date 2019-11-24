@@ -1,10 +1,15 @@
+# -*- coding: utf-8 -*-
+from json import dumps, loads
+
 from django.forms import formset_factory
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.core import serializers
-from json import loads
 from django.http.response import JsonResponse
+from django.shortcuts import render
+
 from .forms import ContactForm, TeacherChoiceForm
+from .teachers_parser import filter_teachers_by_grade as filter_teachers_by_grade_parser
+from .teachers_parser import parse_teachers as teachers_parser
+from .teachers_parser import is_valid_grade
 
 data = {
     # each form field data with a proper index form
@@ -37,4 +42,15 @@ def give_test_json(request):
     { "id": 2, "name": "Amazon AWS" },
     { "id": 3, "name": "Docker" },
     { "id": 4, "name": "Digital Ocean" }
-]"""), safe=False)
+    ]"""), safe=False)
+
+
+def all_teachers(request):
+    answer = [{"name": elem["name"] + " " + elem["subject"]} for elem in teachers_parser()]
+    return JsonResponse(answer, safe=False)
+
+
+def teachers_by_grade(request, grade):
+    filtered_teachers = filter_teachers_by_grade_parser(teachers_parser(), grade)
+    answer = [{"name": elem["name"] + " " + elem["subject"]} for elem in filtered_teachers]
+    return JsonResponse(dumps(answer), safe=False)

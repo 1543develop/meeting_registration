@@ -24,13 +24,19 @@
         <div class="form-group">
             <label for="{{ contact_form.parent_email.id_for_label }}">{{ contact_form.parent_email.label }}</label>
             {{ contact_form.parent_email }}
-            <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            <small id="emailHelp" class="form-text text-muted">Мы обязуемся не распростронять вашу почту</small>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ contact_form.student_grade.id_for_label }}">{{ contact_form.student_grade.label }}</label>
+            {{ contact_form.student_grade }}
         </div>
 
         <div class="form-group">
             <label for="{{ contact_form.student_name.id_for_label }}">{{ contact_form.student_name.label }}</label>
             {{ contact_form.student_name }}
         </div>
+
         {% csrf_token %}
         {{ teacher_choice_form_set.management_form }}
         <div id="form_set">
@@ -47,8 +53,6 @@
             {% endfor %}
         </div>
         <button type="submit" class="btn btn-primary">Отправить заявку</button>
-        {#        <button type="button" value="Add More" id="add_more" onclick="add_fld()">#}
-        {#        <button type="button" value="Delete last" id="del_more" onclick="del_last()">#}
         <div id="empty_form" style="display: none">
             <div class="form-group">
                 <label for="inputTeacherName">{{ teacher_choice_form_set.empty_form.teacher_name.label }}</label>
@@ -98,24 +102,24 @@
         }
     };
 
-    $.ajax({
-        url: 'http://127.0.0.1:8000/test',
-        type: 'get', // This is the default though, you don't actually need to always mention it
-        success: function (data) {
-            console.log(data);
-            $(".basic").typeahead({
-                source: data,
-            });
-        }
-    });
+    update_typehead = function () {
+        var grade = $('#student_grade').val();
+        $.ajax({
+            url: 'http://127.0.0.1:8000/teachers',
+            type: 'get', // This is the default though, you don't actually need to always mention it
+            success: function (data) {
+                $(".teacher_name").typeahead({
+                    source: data,
+                });
+            }
+        });
+    };
 
 
     $(document).ready(function () {
-
-        {#console.log(a)#}
-
+        update_typehead();
         $('#form_set').on('change', check_full);
-
+        $('#form_set').on('change', update_typehead);
 
         $('#form_set').on("click", '.del_this', function () {
             var block = $(this).parent().parent().parent();
@@ -123,8 +127,7 @@
             if (block.index() + 1 !== form_set_length && form_set_length !== 1) {
                 block.remove();
             }
-        })
-
+        });
     });
 </script>
 <!-- Optional JavaScript -->

@@ -20,4 +20,7 @@ from . import views
 urlpatterns = [
     path('', views.registration),
     path('test', views.give_test_json),
+#    path('is_valid_grade', views.is_valid_grade),
+    path('teachers', views.all_teachers),
+    path('teachers/<str:grade>', views.teachers_by_grade),
 ]
