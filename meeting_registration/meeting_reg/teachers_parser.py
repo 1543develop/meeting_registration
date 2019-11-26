@@ -1,8 +1,13 @@
-from openpyxl import load_workbook
+# -*- coding: utf-8 -*-
 import os
+
+from bs4 import BeautifulSoup
+import requests
+from openpyxl import load_workbook
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 SCHEDULE_PATH = PATH + "/teachers_schedule.xlsx"
+TEACHERS_NAMES = PATH + "/teachers.txt"
 
 
 def parse_grade_name(grade_name):
@@ -16,12 +21,28 @@ def parse_grade_name(grade_name):
     return num, grade_letters
 
 
+def get_names_from_1543ru():
+    with open(TEACHERS_NAMES, "r", encoding='utf-8') as file:
+        teachers = list(map(str.strip, file.readlines()))
+        return teachers
+
+
+def get_full_name(shorted_name):
+    full_names = get_names_from_1543ru()
+    for full_name in full_names:
+        # last_name_shorted = full_name.split()[0]
+        # last_name_full = shorted_name.split(".")[0]
+        if full_name.split()[0].lower() == shorted_name.split()[0].lower():
+            return full_name
+    return shorted_name
+
+
 def parse_row(row):
     set_of_grades = get_set_of_grades_in_row(row)
     name = row[1].replace(". ", ".").replace(".", ". ", 1)
     list_of_grades = list(set_of_grades)
     list_of_grades.sort()
-    info = {"name": name, "subject": row[2], "list_of_grades": list_of_grades}
+    info = {"name": get_full_name(name), "subject": row[2], "list_of_grades": list_of_grades}
     return info
 
 
@@ -81,9 +102,20 @@ def filter_teachers_by_grade(teachers_list, grade_raw):
 #     else:
 #         return False
 
+# def has_class_but_no_id(tag):
+#     return tag.has_attr('td')
+
+# def get_names_from_1543ru():
+#     url = "http://1543.ru/teachers/teachers.htm"
+#     html = requests.get(url).content
+#     soup = BeautifulSoup(html, features="html.parser")
+#     res = [elem.text for elem in soup.find_all("td", attrs={"width": "261", "class": "Spisok"})] + \
+#           [elem.text for elem in soup.find_all("td", attrs={"width": "37%", "class": "Spisok"})] + \
+#           [elem.text for elem in soup.find_all("td", attrs={"width": "266", "class": "Spisok"})]
+#     for elem in res:
+#         print(elem)
+
 
 if __name__ == '__main__':
-    teachers = parse_teachers()
-    grade_ = input().upper()
-    class_teachers = filter_teachers_by_grade(teachers, grade_)
-    print(class_teachers)
+    teachers_ = parse_teachers()
+    print(teachers_)

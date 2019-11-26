@@ -52,14 +52,15 @@
                 </div>
             {% endfor %}
         </div>
-        <button type="submit" class="btn btn-primary">Отправить заявку</button>
+        <button type="submit" class="btn btn-primary" formmethod="post">Отправить заявку</button>
         <div id="empty_form" style="display: none">
             <div class="form-group">
                 <label for="inputTeacherName">{{ teacher_choice_form_set.empty_form.teacher_name.label }}</label>
                 <div class="input-group teacher_name mb-3">
                     {{ teacher_choice_form_set.empty_form.teacher_name }}
                     <div class="input-group-append">
-                        <button class="btn btn-danger shadow-none del_this" type="button">Удалить</button>
+                        <button class="btn btn-danger shadow-none del_this" type="button">Удалить
+                        </button>
                     </div>
                 </div>
             </div>
@@ -102,6 +103,11 @@
         }
     };
 
+    delete_subj_from_string = function (string) {
+        var re = /\([^)]*\)\s*/;
+        return string.replace(re, "");
+    };
+
     update_typehead = function () {
         var grade = $('#student_grade').val();
         $.ajax({
@@ -128,6 +134,12 @@
                 block.remove();
             }
         });
+
+        {#$('#form_set').on("change", '.del_this', function () {#}
+        {#    var block = $(this);#}
+        {#    var re = /\([^)]*\)\s*/;#}
+        {#    $(this).val = $(this).val.replace(re, "");#}
+        {##}
     });
 </script>
 <!-- Optional JavaScript -->

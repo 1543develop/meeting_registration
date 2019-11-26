@@ -15,6 +15,14 @@ class Student(models.Model):
         return f"{self.name} {self.grade}"
 
 
+class Form(models.Model):
+    parent_name = models.CharField(max_length=100)
+    parent_email = models.EmailField(max_length=100)
+    student_grade = models.CharField(max_length=10)
+    student_name = models.CharField(max_length=100)
+    teacher_names = models.CharField(max_length=1000)
+
+
 class Teacher(models.Model):
     name = models.CharField(max_length=100)
     list_of_grades = models.CharField(max_length=100)

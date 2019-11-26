@@ -7,7 +7,7 @@ class ContactForm(forms.Form):
                                                                 "id": "parent_name",
                                                                 "placeholder": "Введите ФИО"}))
     parent_email = forms.EmailField(label="Адрес почты родителя", max_length=100,
-                                    widget=forms.TextInput(attrs={"class": "form-control",
+                                    widget=forms.EmailInput(attrs={"class": "form-control",
                                                                   "id": "parent_email",
                                                                   "placeholder": "Введите адрес почты"}))
     student_grade = forms.CharField(label="Класс Ученика", max_length=100,
