@@ -15,12 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+
 from . import views
 
 urlpatterns = [
     path('', views.registration),
+    path('mailing', views.mailing),
+    path('import', views.upload_teachers_to_db),
+    path('admin', admin.site.urls),
     path('test', views.give_test_json),
-#    path('is_valid_grade', views.is_valid_grade),
     path('teachers', views.all_teachers),
     path('teachers/<str:grade>', views.teachers_by_grade),
 ]

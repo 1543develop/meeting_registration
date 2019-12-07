@@ -4,6 +4,7 @@ import os
 from bs4 import BeautifulSoup
 import requests
 from openpyxl import load_workbook
+from .models import Teacher
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 SCHEDULE_PATH = PATH + "/teachers_schedule.xlsx"
@@ -21,9 +22,12 @@ def parse_grade_name(grade_name):
     return num, grade_letters
 
 
-def get_names_from_1543ru():
+def get_names_from_1543ru(emails=False):
     with open(TEACHERS_NAMES, "r", encoding='utf-8') as file:
-        teachers = list(map(str.strip, file.readlines()))
+        if emails:
+            teachers = list(map(lambda str_: str_.strip().split(","), file.readlines()))
+        else:
+            teachers = list(map(lambda str_: str_.strip().split(",")[0], file.readlines()))
         return teachers
 
 
@@ -114,6 +118,9 @@ def filter_teachers_by_grade(teachers_list, grade_raw):
 #           [elem.text for elem in soup.find_all("td", attrs={"width": "266", "class": "Spisok"})]
 #     for elem in res:
 #         print(elem)
+
+
+
 
 
 if __name__ == '__main__':

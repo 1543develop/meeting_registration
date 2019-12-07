@@ -22,6 +22,8 @@ Todo:
 import smtplib
 import ssl
 from dataclasses import dataclass
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from typing import List
 
 
@@ -40,7 +42,7 @@ class EmailSender:
     def __init__(self, smtp_server_address: str, sender_email: str, password: str):
         self.cfg = Config(smtp_server_address, sender_email, password)
 
-    def send_mail_to_person(self, receiver_email: str, message: str):
+    def send_mail_to_person(self, receiver_email: str, message: MIMEMultipart):
         """
         Function that sends email to single person
         Args:
@@ -53,9 +55,9 @@ class EmailSender:
         """
         with smtplib.SMTP_SSL(self.cfg.smtp_server_address, self.cfg.port, context=self.cfg.context) as server:
             server.login(self.cfg.sender_email, self.cfg.password)
-            server.sendmail(self.cfg.sender_email, receiver_email, message)
+            server.sendmail(self.cfg.sender_email, receiver_email, message.as_string())
 
-    def send_mails_to_people(self, receiver_emails: List[str], message: str):
+    def send_mails_to_people(self, receiver_emails: List[str], message: MIMEMultipart):
         """
         Function that sends emails with same content to multiple people
         Args:
@@ -67,3 +69,16 @@ class EmailSender:
         """
         for email in receiver_emails:
             self.send_mail_to_person(email, message)
+
+    @staticmethod
+    def construct_message(text, encoding="utf-8"):
+        message = MIMEMultipart("alternative")
+        message.attach(MIMEText(text, "plain", encoding))
+        return message
+
+    def send_alert_to_teacher(self, teacher, parents):
+        header = f"""Добрый день, {teacher["name"]}.\nНа встречу с вами записалось {len(parents)} родителей:"""
+        lister = " ".join(f"{parent['parent_name']} - {parent['student_name']} ({parent['student_grade']})"
+                          for parent in parents)
+        self.send_mail_to_person(teacher["email"], self.construct_message(header + lister))
+        print("mail_sent")

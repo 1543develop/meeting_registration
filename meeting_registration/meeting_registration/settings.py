@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from config import ConfigSecrets
+from .config import ConfigSecrets
 
 config_secrets = ConfigSecrets()
 
@@ -117,4 +117,3 @@ USE_TZ = True
 
 STATICFILES_DIRS = ['meeting_reg/static']
 STATIC_URL = '/static/'
-

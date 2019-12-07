@@ -1,3 +1,4 @@
-config_secrets.json
+meeting_registration/meeting_registration/config_secrets.json
+meeting_registration/meeting_reg/config_secrets.json
 .idea
 meeting_registration/db.sqlite3
