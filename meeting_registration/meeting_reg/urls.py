@@ -20,10 +20,11 @@ from . import views
 
 urlpatterns = [
     path('', views.registration),
+    path('update/<str:token>', views.re_registration),
     path('mailing', views.mailing),
     path('import', views.upload_teachers_to_db),
     path('admin', admin.site.urls),
     path('test', views.give_test_json),
     path('teachers', views.all_teachers),
-    path('teachers/<str:grade>', views.teachers_by_grade),
+    # path('teachers/<str:grade>', views.teachers_by_grade),
 ]

@@ -4,6 +4,7 @@ import re
 import string
 from json import dumps, loads
 
+from django.db.models import QuerySet
 from django.forms import formset_factory, model_to_dict
 from django.http import HttpResponseRedirect
 from django.http.response import JsonResponse
@@ -36,11 +37,9 @@ def registration(request):
         contact_form = ContactForm(request.POST, prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
-            parent, _ = Parent.objects.get_or_create(token=create_token(),
-                                                     parent_name=contact_form.cleaned_data["parent_name"],
-                                                     student_name=contact_form.cleaned_data["student_name"],
-                                                     parent_email=contact_form.cleaned_data["parent_email"],
-                                                     student_grade=contact_form.cleaned_data["student_grade"], )
+            parent = contact_form.save()
+            parent.token = create_token()
+            parent.save()
             for teacher in filter(lambda x: x, teacher_choice_form_set.cleaned_data):
                 teacher = Teacher.objects.get(name=strip_subject(teacher["teacher_name"]))
                 app = Appointment.objects.create(teacher=teacher, parent=parent, comment="Nothing")
@@ -50,6 +49,34 @@ def registration(request):
         teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set})
+
+
+def re_registration(request, token):
+    TeacherChoiceFormSet = formset_factory(TeacherChoiceForm, extra=1)
+    if request.method == "POST":
+        contact_form = ContactForm(request.POST, prefix="contacts")
+        teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
+        if contact_form.is_valid() and teacher_choice_form_set.is_valid():
+            Parent.objects.filter(token=token).delete()
+            parent = contact_form.save()
+            parent.token = token
+            parent.save()
+            Appointment.objects.filter(parent=parent).delete()
+            for teacher in filter(lambda x: x, teacher_choice_form_set.cleaned_data):
+                teacher = Teacher.objects.get(name=strip_subject(teacher["teacher_name"]))
+                app = Appointment.objects.create(teacher=teacher, parent=parent, comment="Nothing")
+                app.save()
+    else:
+        parent = Parent.objects.get(token=token)
+        contact_form = ContactForm(instance=parent, prefix="contacts")
+
+        initial_data = []
+        for appointment in Appointment.objects.filter(parent=parent):
+            initial_data.append({"teacher_name": appointment.teacher.name})
+        teacher_choice_form_set = TeacherChoiceFormSet(initial=initial_data, prefix="teachers")
+
+    return render(request, "registration_form.html", {"contact_form": contact_form,
+                                                         "teacher_choice_form_set": teacher_choice_form_set})
 
 
 def strip_subject(inp_string):

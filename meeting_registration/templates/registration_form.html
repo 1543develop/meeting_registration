@@ -1,19 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{% extends 'base.html' %}
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-
-    <title>Title</title>
-</head>
-<body>
-<div class="container mt-3 pt-6">
+{% block content %}
     <form method="post">
         {% csrf_token %}
         <div class="form-group">
@@ -66,89 +53,4 @@
             </div>
         </div>
     </form>
-    <div class="footer pt-4"></div>
-</div>
-<script
-        src="https://code.jquery.com/jquery-3.4.1.min.js"
-        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-        crossorigin="anonymous"></script>
-{% load static %}
-<script src="{% static 'js/bootstrap3-typeahead.js' %}"></script>
-<script>
-    add_fld = function () {
-        var form_idx = $('#id_teachers-TOTAL_FORMS').val();
-        $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
-        $('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-    };
-
-    del_last = function () {
-        var form_idx = $('#id_teachers-TOTAL_FORMS').val();
-        if (form_idx > 1) {
-            $('#form_set .form-group').last().remove();
-            {#$('#id_teachers-TOTAL_FORMS').val(parseInt(form_idx) - 1);#}
-        }
-    };
-
-    check_full = function () {
-        var allGood = true;
-        $('#form_set').children('div').each(function () {
-            if ($(this).find('div.teacher_name input').val() === '') {
-                if ($('#form_set').lastChild !== $(this)) {
-                    $(this).remove();
-                }
-            }
-        });
-        if (allGood) {
-            add_fld();
-        }
-    };
-
-    delete_subj_from_string = function (string) {
-        var re = /\([^)]*\)\s*/;
-        return string.replace(re, "");
-    };
-
-    update_typehead = function () {
-        var grade = $('#student_grade').val();
-        $.ajax({
-            url: 'http://127.0.0.1:8000/teachers',
-            type: 'get', // This is the default though, you don't actually need to always mention it
-            success: function (data) {
-                $(".teacher_name").typeahead({
-                    source: data,
-                });
-            }
-        });
-    };
-
-
-    $(document).ready(function () {
-        update_typehead();
-        $('#form_set').on('change', check_full);
-        $('#form_set').on('change', update_typehead);
-
-        $('#form_set').on("click", '.del_this', function () {
-            var block = $(this).parent().parent().parent();
-            var form_set_length = block.parent().children().length;
-            if (block.index() + 1 !== form_set_length && form_set_length !== 1) {
-                block.remove();
-            }
-        });
-
-        {#$('#form_set').on("change", '.del_this', function () {#}
-        {#    var block = $(this);#}
-        {#    var re = /\([^)]*\)\s*/;#}
-        {#    $(this).val = $(this).val.replace(re, "");#}
-        {##}
-    });
-</script>
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
-</body>
-</html>
+{% endblock %}

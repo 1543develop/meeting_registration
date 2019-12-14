@@ -34,8 +34,6 @@ def get_names_from_1543ru(emails=False):
 def get_full_name(shorted_name):
     full_names = get_names_from_1543ru()
     for full_name in full_names:
-        # last_name_shorted = full_name.split()[0]
-        # last_name_full = shorted_name.split(".")[0]
         if full_name.split()[0].lower() == shorted_name.split()[0].lower():
             return full_name
     return shorted_name
@@ -98,29 +96,6 @@ def filter_teachers_by_grade(teachers_list, grade_raw):
         if grade in teacher["list_of_grades"]:
             teachers_of_grade.append(teacher)
     return teachers_of_grade
-
-
-# def is_valid_grade(request, grade):
-#     if grade in get_set_of_grades_in_row():
-#         return True
-#     else:
-#         return False
-
-# def has_class_but_no_id(tag):
-#     return tag.has_attr('td')
-
-# def get_names_from_1543ru():
-#     url = "http://1543.ru/teachers/teachers.htm"
-#     html = requests.get(url).content
-#     soup = BeautifulSoup(html, features="html.parser")
-#     res = [elem.text for elem in soup.find_all("td", attrs={"width": "261", "class": "Spisok"})] + \
-#           [elem.text for elem in soup.find_all("td", attrs={"width": "37%", "class": "Spisok"})] + \
-#           [elem.text for elem in soup.find_all("td", attrs={"width": "266", "class": "Spisok"})]
-#     for elem in res:
-#         print(elem)
-
-
-
 
 
 if __name__ == '__main__':
