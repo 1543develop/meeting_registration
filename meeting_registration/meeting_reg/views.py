@@ -2,9 +2,9 @@
 import random
 import re
 import string
-from json import dumps, loads
+import time
+from json import dumps
 
-from django.db.models import QuerySet
 from django.forms import formset_factory, model_to_dict
 from django.http import HttpResponseRedirect
 from django.http.response import JsonResponse
@@ -13,10 +13,9 @@ from django.shortcuts import render
 from .config import ConfigSecrets
 from .email_sender import EmailSender
 from .forms import ContactForm, TeacherChoiceForm
-from .models import Parent, Teacher, Appointment
-from .teachers_parser import filter_teachers_by_grade as filter_teachers_by_grade_parser
-from .teachers_parser import get_names_from_1543ru
-from .teachers_parser import parse_teachers as teachers_parser
+from .models import Parent, Teacher, Appointment, Class
+from .teachers_parser import filter_teachers_by_class as filter_teachers_by_grade_parser
+from .teachers_parser import parse_teachers_schedule
 
 cfg = ConfigSecrets()
 
@@ -44,6 +43,14 @@ def registration(request):
                 teacher = Teacher.objects.get(name=strip_subject(teacher["teacher_name"]))
                 app = Appointment.objects.create(teacher=teacher, parent=parent, comment="Nothing")
                 app.save()
+            email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
+                                       sender_email=cfg["mail"]["email_sender"],
+                                       password=cfg["mail"]["password"])
+            teacher_list = []
+            for appointment in Appointment.objects.filter(parent=parent):
+                teacher_list.append(model_to_dict(appointment.teacher))
+            email_sender.send_alert_to_parent(model_to_dict(parent), teacher_list)
+            return HttpResponseRedirect("thanks")
     else:
         contact_form = ContactForm(prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
@@ -66,6 +73,14 @@ def re_registration(request, token):
                 teacher = Teacher.objects.get(name=strip_subject(teacher["teacher_name"]))
                 app = Appointment.objects.create(teacher=teacher, parent=parent, comment="Nothing")
                 app.save()
+            email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
+                                       sender_email=cfg["mail"]["email_sender"],
+                                       password=cfg["mail"]["password"])
+            teacher_list = []
+            for appointment in Appointment.objects.filter(parent=parent):
+                teacher_list.append(model_to_dict(appointment.teacher))
+            email_sender.send_alert_to_parent(model_to_dict(parent), teacher_list)
+            return HttpResponseRedirect("/thanks")
     else:
         parent = Parent.objects.get(token=token)
         contact_form = ContactForm(instance=parent, prefix="contacts")
@@ -84,12 +99,12 @@ def strip_subject(inp_string):
 
 
 def all_teachers(request):
-    answer = [{"name": f'{elem["name"]} ({elem["subject"].lower()})'} for elem in teachers_parser()]
+    answer = [{"name": f'{elem["name"]} ({elem["subject"].lower()})'} for elem in parse_teachers_schedule()]
     return JsonResponse(answer, safe=False)
 
 
 def teachers_by_grade(request, grade):
-    filtered_teachers = filter_teachers_by_grade_parser(teachers_parser(), grade)
+    filtered_teachers = filter_teachers_by_grade_parser(parse_teachers_schedule(), grade)
     answer = [{"name": f'{elem["name"]} ({elem["subject"].lower()})'} for elem in filtered_teachers]
     return JsonResponse(dumps(answer), safe=False)
 
@@ -99,13 +114,19 @@ def clear_teachers_from_db(request):
 
 
 def upload_teachers_to_db(request):
-    teachers = get_names_from_1543ru(emails=True)
+    teachers = parse_teachers_schedule()
 
-    for (teacher, email) in teachers:
-        Teacher.objects.update_or_create(
-            name=teacher,
-            email=email
+    for teacher in teachers:
+
+        teacher_obj, _ = Teacher.objects.get_or_create(
+            name=teacher["name"],
+            email=teacher["email"],
+            subject=teacher["subject"],
         )
+        teacher_obj.save()
+        for class_ in teacher["list_of_classes"]:
+            class_obj, _ = Class.objects.get_or_create(name=class_)
+            teacher_obj.classes.add(class_obj)
     return HttpResponseRedirect("/admin")
 
 
@@ -123,8 +144,9 @@ def mailing(request):
         appointments = Appointment.objects.filter(teacher=teacher)
         for appointment in appointments:
             parents_list.append(model_to_dict(appointment.parent))
-        email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
-    return HttpResponseRedirect("admin")
+        if teacher.email:
+            email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
+    return HttpResponseRedirect("/admin")
 
 
 def thanks_page(request):

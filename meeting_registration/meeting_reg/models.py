@@ -1,9 +1,21 @@
 from django.db import models
 
 
+class Class(models.Model):
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class Teacher(models.Model):
     name = models.CharField(max_length=100)
-    email = models.EmailField()
+    email = models.EmailField(max_length=100)
+    subject = models.CharField(max_length=100, blank=True)
+    classes = models.ManyToManyField(Class, blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -29,4 +41,4 @@ class Appointment(models.Model):
     comment = models.CharField(max_length=1000)
 
     def __str__(self):
-        return f"{self.teacher.name} - {self.parent}"
+        return f"{self.teacher.name} - {self.parent.parent_name} ({self.parent.student_name}, {self.parent.student_grade})"

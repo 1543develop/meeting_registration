@@ -21,6 +21,7 @@ Todo:
 """
 import smtplib
 import ssl
+import time
 from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -57,7 +58,7 @@ class EmailSender:
             server.login(self.cfg.sender_email, self.cfg.password)
             server.sendmail(self.cfg.sender_email, receiver_email, message.as_string())
 
-    def send_mails_to_people(self, receiver_emails: List[str], message: MIMEMultipart):
+    def send_mails_to_people(self, receiver_emails: List[str], message: MIMEMultipart, delay=5):
         """
         Function that sends emails with same content to multiple people
         Args:
@@ -68,22 +69,26 @@ class EmailSender:
 
         """
         for email in receiver_emails:
+            time.sleep(delay)
             self.send_mail_to_person(email, message)
 
     @staticmethod
-    def construct_message(text, encoding="utf-8"):
+    def construct_message(text, header=None, encoding="utf-8"):
         message = MIMEMultipart("alternative")
-        message.attach(MIMEText(text, "plain", encoding))
+        msg_text = MIMEText(text, "plain", encoding)
+        message["Subject"] = header
+        message.attach(msg_text)
         return message
 
     def send_alert_to_teacher(self, teacher, parents):
-        header = f"""Добрый день, {teacher["name"]}.\nНа встречу с вами записалось {len(parents)} родителей:\n"""
-        lister = " ".join(f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']})\n"
-                          for parent in parents)
-        self.send_mail_to_person(teacher["email"], self.construct_message(header + lister))
+        header = f'Добрый день, на встречу с вами записалось {len(parents)} родителей.\n'
+        top = f'Добрый день, {teacher["name"]}.\nНа встречу с вами записалось {len(parents)} родителей:\n\n'
+        lister = "\n".join(f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']})"
+                           for parent in parents)
+        self.send_mail_to_person(teacher["email"], self.construct_message(top + lister, header=header))
 
     def send_alert_to_parent(self, parent, teachers):
-        header = f"""Добрый день, {parent["parent_name"]}.\nВы записались на встречу с {len(teachers)} учителями:\n"""
-        lister = " ".join(f"{teacher['name']}\n"
-                          for teacher in teachers)
-        self.send_mail_to_person(parent["parent_email"], self.construct_message(header + lister))
+        header = f'Добрый день, вы записались на встречу с {len(teachers)} учителями.'
+        top = f'Добрый день, {parent["parent_name"]}.\nВы записались на встречу с {len(teachers)} учителями:\n\n'
+        lister = "\n".join(f"{teacher['name']}" for teacher in teachers)
+        self.send_mail_to_person(parent["parent_email"], self.construct_message(top + lister, header=header))
