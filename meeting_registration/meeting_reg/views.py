@@ -76,20 +76,11 @@ def re_registration(request, token):
         teacher_choice_form_set = TeacherChoiceFormSet(initial=initial_data, prefix="teachers")
 
     return render(request, "registration_form.html", {"contact_form": contact_form,
-                                                         "teacher_choice_form_set": teacher_choice_form_set})
+                                                      "teacher_choice_form_set": teacher_choice_form_set})
 
 
 def strip_subject(inp_string):
     return re.sub(r"\([^)]*\)\s*", "", inp_string).strip()
-
-
-def give_test_json(request):
-    return JsonResponse(loads("""[
-    { "id": 1, "name": "Матюхин Виктор Александрович Информатика" },
-    { "id": 2, "name": "Amazon AWS" },
-    { "id": 3, "name": "Docker" },
-    { "id": 4, "name": "Digital Ocean" }
-    ]"""), safe=False)
 
 
 def all_teachers(request):
@@ -134,3 +125,7 @@ def mailing(request):
             parents_list.append(model_to_dict(appointment.parent))
         email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
     return HttpResponseRedirect("admin")
+
+
+def thanks_page(request):
+    return render(request, "thanks.html")

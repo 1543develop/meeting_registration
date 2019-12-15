@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from bs4 import BeautifulSoup
-import requests
 from openpyxl import load_workbook
-from .models import Teacher
 
 PATH = os.path.dirname(os.path.realpath(__file__))
 SCHEDULE_PATH = PATH + "/teachers_schedule.xlsx"
