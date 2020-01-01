@@ -715,7 +715,7 @@
 
     Typeahead.defaults = {
         source: [],
-        items: 8,
+        items: 100,
         minLength: 1,
         scrollHeight: 0,
         autoSelect: true,
@@ -730,17 +730,17 @@
         openLinkInNewTab: false,
         selectOnBlur: true,
         showCategoryHeader: true,
-        theme: "bootstrap3",
+        theme: "bootstrap4",
         themes: {
         bootstrap3: {
-            menu: '<ul class="typeahead dropdown-menu" role="listbox"></ul>',
+            menu: '<ul class="typeahead dropdown-menu smooth-scroll" style="max-height:40vh; max-width: 50vw; overflow-y: scroll" role="listbox"></ul>',
             item: '<li><a class="dropdown-item" href="#" role="option"></a></li>',
             itemContentSelector: "a",
             headerHtml: '<li class="dropdown-header"></li>',
             headerDivider: '<li class="divider" role="separator"></li>'
         },
         bootstrap4: {
-            menu: '<div class="typeahead dropdown-menu" role="listbox"></div>',
+            menu: '<div class="typeahead dropdown-menu smooth-scroll scrollbar-primary" style="max-height:200px; overflow-y: scroll" role="listbox"></div>',
             item: '<button class="dropdown-item" role="option"></button>',
             itemContentSelector: '.dropdown-item',
             headerHtml: '<h6 class="dropdown-header"></h6>',

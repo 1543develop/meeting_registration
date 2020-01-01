@@ -4,7 +4,6 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -23,6 +22,9 @@
 {% load static %}
 <script src="{% static 'js/bootstrap3-typeahead.js' %}"></script>
 <script>
+
+    {#var typehead_class = null;#}
+    var typehead_teachers = null;
     add_fld = function () {
         var form_idx = $('#id_teachers-TOTAL_FORMS').val();
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
@@ -56,24 +58,47 @@
         return string.replace(re, "");
     };
 
-    update_typehead = function () {
-        var grade = $('#student_grade').val();
+    update_typehead_class = function () {
         $.ajax({
-            url: 'http://127.0.0.1:8000/teachers',
+            url: 'http://127.0.0.1:8000/classes',
             type: 'get', // This is the default though, you don't actually need to always mention it
             success: function (data) {
-                $(".teacher_name").typeahead({
-                    source: data,
+                $("#student_grade").typeahead({
+                    source: data
                 });
             }
         });
     };
 
+    request_typehead_teachers = function () {
+        $.ajax({
+            url: 'http://127.0.0.1:8000/teachers',
+            type: 'get', // This is the default though, you don't actually need to always mention it
+            success: function (data) {
+                typehead_teachers = data;
+                update_typehead_teachers();
+            }
+        });
+    };
+
+    update_typehead_teachers = function () {
+        console.log(typehead_teachers);
+        if (typehead_teachers !== null) {
+            var class_ = $("#student_grade").val().toUpperCase().replace("A", "А").replace("B", "В");
+            console.log(class_, class_ in typehead_teachers);
+            console.log(typehead_teachers[class_], "inside");
+            $(".teacher_name").typeahead({
+                source: typehead_teachers[class_],
+            });
+        }
+    };
 
     $(document).ready(function () {
-        update_typehead();
+        update_typehead_class();
+        request_typehead_teachers();
         $('#form_set').on('change', check_full);
-        $('#form_set').on('change', update_typehead);
+        $('#student_grade').on('change', update_typehead_teachers);
+        $('#form_set').on('change', update_typehead_teachers);
 
         $('#form_set').on("click", '.del_this', function () {
             var block = $(this).parent().parent().parent();

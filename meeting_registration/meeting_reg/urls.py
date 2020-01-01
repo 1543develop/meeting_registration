@@ -26,5 +26,9 @@ urlpatterns = [
     path('import', views.upload_teachers_to_db),
     path('admin', admin.site.urls),
     path('teachers', views.all_teachers),
+    path('classes', views.all_classes),
+    path('clear', views.clear_teachers_from_db),
+    path('teachers_dump', views.appointments_dump_for_teachers),
+    path('parents_dump', views.appointments_dump_for_parent)
     # path('teachers/<str:grade>', views.teachers_by_grade),
 ]

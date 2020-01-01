@@ -9,6 +9,10 @@ SCHEDULE_PATH = PATH + "/teachers_schedule.xlsx"
 TEACHERS_NAMES = PATH + "/teachers.txt"
 
 
+def key_class_sorting(class_):
+    return int(class_[:-1]), class_[-1]
+
+
 def parse_class_name(class_name):
     num = ""
     class_letters = []
@@ -29,12 +33,18 @@ def all_teacher_full_names(emails=False):
         return teachers
 
 
-def get_full_name_and_email_by_short_name(short_name):
+def get_full_name_and_email_by_short_name(short_name_raw):
     full_names = all_teacher_full_names(emails=True)
-    for full_name, email in full_names:
-        if full_name.split()[0].lower() == short_name.split()[0].lower():
-            return full_name, email
-    return short_name, ""
+    for full_name_raw, email in full_names:
+        full_name = full_name_raw.lower().replace("ё", "е").split()
+        short_name = short_name_raw.lower().replace("ё", "е").split()
+        try:
+            if full_name[0] == short_name[0] and full_name[1][0] == short_name[1][0] \
+                    and full_name[2][0] == short_name[2][0]:
+                return full_name_raw, email
+        except:
+            pass
+    return short_name_raw, ""
 
 
 def parse_teachers_schedule():

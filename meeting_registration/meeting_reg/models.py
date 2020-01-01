@@ -21,7 +21,8 @@ class Teacher(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} - {self.email}"
+        return f"{self.name} - {self.email} - {self.subject} " \
+               f"({' '.join(elem.name for elem in self.classes.all())})"
 
 
 class Parent(models.Model):

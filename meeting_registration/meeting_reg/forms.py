@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from .models import Parent, Appointment
+from .models import Parent, Appointment, Class
 
 
 class ContactForm(forms.ModelForm):
