@@ -81,21 +81,32 @@
         });
     };
 
+    student_grade = function () {
+        return $("#student_grade").val().toUpperCase().replace("A", "А").replace("B", "В");
+    };
+
+    upd_tch = function (class_name) {
+        $(".teacher_name").typeahead({
+            source: typehead_teachers[class_name],
+        });
+    };
+
     update_typehead_teachers = function () {
-        console.log(typehead_teachers);
         if (typehead_teachers !== null) {
-            var class_ = $("#student_grade").val().toUpperCase().replace("A", "А").replace("B", "В");
-            console.log(class_, class_ in typehead_teachers);
-            console.log(typehead_teachers[class_], "inside");
-            $(".teacher_name").typeahead({
-                source: typehead_teachers[class_],
-            });
+            var class_ = student_grade();
+            if (class_ in typehead_teachers) {
+                console.log(typehead_teachers[class_], "inside");
+                $(".teacher_name").typeahead({
+                    source: typehead_teachers[class_],
+                });
+            }
         }
     };
 
     $(document).ready(function () {
         update_typehead_class();
         request_typehead_teachers();
+        update_typehead_teachers();
         $('#form_set').on('change', check_full);
         $('#student_grade').on('change', update_typehead_teachers);
         $('#form_set').on('change', update_typehead_teachers);
