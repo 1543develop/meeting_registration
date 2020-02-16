@@ -49,7 +49,13 @@ class Appointment(models.Model):
 
 
 class OpenDay(models.Model):
-    date = models.DateTimeField()
+    datetime = models.DateTimeField()
+
+    def date(self):
+        return self.datetime.astimezone(tz).strftime('%d.%m.%Y')
+
+    def time(self):
+        return self.datetime.astimezone(tz).strftime('%H:%M')
 
     def __str__(self):
-        return 'Заявка от {}'.format(self.date.astimezone(tz).strftime('%d.%m.%Y %H:%M'))
+        return 'День открытых дверей от {}'.format(self.datetime.astimezone(tz).strftime('%d.%m.%Y %H:%M'))

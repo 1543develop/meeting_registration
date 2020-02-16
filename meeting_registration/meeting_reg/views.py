@@ -15,7 +15,7 @@ from django.shortcuts import render
 from .config import ConfigSecrets
 from .email_sender import EmailSender
 from .forms import ContactForm, TeacherChoiceForm
-from .models import Parent, Teacher, Appointment, Class
+from .models import Parent, Teacher, Appointment, Class, OpenDay
 from .teachers_parser import filter_teachers_by_class as filter_teachers_by_grade_parser
 from .teachers_parser import parse_teachers_schedule
 
@@ -32,7 +32,13 @@ data = {
 logger = logging.getLogger("views")
 
 
+def get_current_open_day():
+    day = OpenDay.objects.filter().first()
+    return day
+
+
 def registration(request):
+    day = get_current_open_day()
     TeacherChoiceFormSet = formset_factory(TeacherChoiceForm, extra=1)
     if request.method == "POST":
         contact_form = ContactForm(request.POST, prefix="contacts")
@@ -49,10 +55,13 @@ def registration(request):
         contact_form = ContactForm(prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
     return render(request, "registration_form.html", {"contact_form": contact_form,
-                                                      "teacher_choice_form_set": teacher_choice_form_set})
+                                                      "teacher_choice_form_set": teacher_choice_form_set,
+                                                      "date": day.date(),
+                                                      "time": day.time()})
 
 
 def re_registration(request, token):
+    day = get_current_open_day()
     TeacherChoiceFormSet = formset_factory(TeacherChoiceForm, extra=1)
     if request.method == "POST":
         contact_form = ContactForm(request.POST, prefix="contacts")
@@ -77,7 +86,9 @@ def re_registration(request, token):
         teacher_choice_form_set = TeacherChoiceFormSet(initial=initial_data, prefix="teachers")
 
     return render(request, "registration_form.html", {"contact_form": contact_form,
-                                                      "teacher_choice_form_set": teacher_choice_form_set})
+                                                      "teacher_choice_form_set": teacher_choice_form_set,
+                                                      "date": day.date(),
+                                                      "time": day.time()})
 
 
 def send_appointments_info_to_email(parent):
