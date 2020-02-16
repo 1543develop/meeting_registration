@@ -29,6 +29,7 @@ urlpatterns = [
     path('classes', views.all_classes),
     path('clear', views.clear_teachers_from_db),
     path('teachers_dump', views.appointments_dump_for_teachers),
-    path('parents_dump', views.appointments_dump_for_parent)
-    # path('teachers/<str:grade>', views.teachers_by_grade),
+    path('parents_dump', views.appointments_dump_for_parent),
+    path('teachers/<str:grade>', views.teachers_by_grade),
+    path('manip_panel', views.manip_panel),
 ]

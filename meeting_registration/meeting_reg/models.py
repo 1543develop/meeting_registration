@@ -1,4 +1,7 @@
 from django.db import models
+from django.utils import timezone
+
+tz = timezone.get_default_timezone()
 
 
 class Class(models.Model):
@@ -43,3 +46,10 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.teacher.name} - {self.parent.parent_name} ({self.parent.student_name}, {self.parent.student_grade})"
+
+
+class OpenDay(models.Model):
+    date = models.DateTimeField()
+
+    def __str__(self):
+        return 'Заявка от {}'.format(self.date.astimezone(tz).strftime('%d.%m.%Y %H:%M'))

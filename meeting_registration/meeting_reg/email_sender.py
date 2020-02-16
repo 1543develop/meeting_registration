@@ -81,14 +81,14 @@ class EmailSender:
         return message
 
     def send_alert_to_teacher(self, teacher, parents):
-        header = f'Добрый день, на встречу с вами записалось {len(parents)} родителей.\n'
+        header = f'К вами записалось {len(parents)} родителей.\n'
         top = f'Добрый день, {teacher["name"]}.\nНа встречу с вами записалось {len(parents)} родителей:\n\n'
         lister = "\n".join(f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']})"
                            for parent in parents)
         self.send_mail_to_person(teacher["email"], self.construct_message(top + lister, header=header))
 
     def send_alert_to_parent(self, parent, teachers):
-        header = f'Добрый день, вы записались на встречу с {len(teachers)} учителями.'
+        header = f'Вы записались к {len(teachers)} учителями.'
         top = f'Добрый день, {parent["parent_name"]}.\nВы записались на встречу с {len(teachers)} учителями:\n\n'
         lister = "\n".join(f"{teacher['name']}" for teacher in teachers)
         self.send_mail_to_person(parent["parent_email"], self.construct_message(top + lister, header=header))

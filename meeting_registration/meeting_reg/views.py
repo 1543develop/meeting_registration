@@ -6,6 +6,7 @@ import string
 from collections import defaultdict
 from json import dumps
 
+from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory, model_to_dict
 from django.http import HttpResponseRedirect
 from django.http.response import JsonResponse, HttpResponse
@@ -109,6 +110,7 @@ def strip_subject(inp_string):
     return re.sub(r"\([^)]*\)\s*", "", inp_string).strip()
 
 
+@login_required
 def all_classes(request):
     answer = [{"name": elem.name} for elem in Class.objects.all()]
     return JsonResponse(answer, safe=False)
@@ -131,11 +133,13 @@ def teachers_by_grade(request, grade):
     return JsonResponse(dumps(answer), safe=False)
 
 
+@login_required
 def clear_teachers_from_db(request):
     Teacher.objects.all().delete()
-    return HttpResponseRedirect("/admin")
+    return HttpResponseRedirect("/manip")
 
 
+@login_required
 def upload_teachers_to_db(request):
     teachers = parse_teachers_schedule()
 
@@ -150,7 +154,7 @@ def upload_teachers_to_db(request):
         for class_ in teacher["list_of_classes"]:
             class_obj, _ = Class.objects.get_or_create(name=class_)
             teacher_obj.classes.add(class_obj)
-    return HttpResponseRedirect("/admin")
+    return HttpResponseRedirect("/manip")
 
 
 def create_token(length=20):
@@ -158,6 +162,7 @@ def create_token(length=20):
     return "".join(random.choices(letters_pool, k=length))
 
 
+@login_required
 def mailing(request):
     email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
                                sender_email=cfg["mail"]["email_sender"],
@@ -169,7 +174,7 @@ def mailing(request):
             parents_list.append(model_to_dict(appointment.parent))
         if teacher.email:
             email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
-    return HttpResponseRedirect("/admin")
+    return HttpResponseRedirect("/manip")
 
 
 def thanks_page(request):
@@ -188,6 +193,7 @@ def create_html_table_from_teachers_dump(dump: defaultdict):
     return html
 
 
+@login_required
 def appointments_dump_for_teachers(request):
     dump = defaultdict(list)
     for teacher in Teacher.objects.all():
@@ -210,6 +216,7 @@ def create_html_table_from_parents_dump(dump: defaultdict):
     return html
 
 
+@login_required
 def appointments_dump_for_parent(request):
     dump = defaultdict(list)
     for parent in Parent.objects.all():
@@ -217,3 +224,7 @@ def appointments_dump_for_parent(request):
             dump[f"{parent.parent_name} ({parent.student_name}, {parent.student_grade})"].append(
                 {"name": appointment.teacher.name})
     return HttpResponse(create_html_table_from_parents_dump(dump))
+
+
+def manip_panel(request):
+    return render(request, "manip/manip_panel.html")
