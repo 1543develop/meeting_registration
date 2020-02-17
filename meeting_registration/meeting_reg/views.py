@@ -57,7 +57,8 @@ def registration(request):
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set,
                                                       "date": day.date(),
-                                                      "time": day.time()})
+                                                      "time": day.time(),
+                                                      "page_title": "День открытых дверей 1543"})
 
 
 def re_registration(request, token):
@@ -88,7 +89,8 @@ def re_registration(request, token):
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set,
                                                       "date": day.date(),
-                                                      "time": day.time()})
+                                                      "time": day.time(),
+                                                      "page_title": "День открытых дверей 1543"})
 
 
 def send_appointments_info_to_email(parent):
@@ -238,4 +240,4 @@ def appointments_dump_for_parent(request):
 
 
 def manip_panel(request):
-    return render(request, "manip/manip_panel.html")
+    return render(request, "manip/manip_panel.html", {"page_title": "Панель управления"})

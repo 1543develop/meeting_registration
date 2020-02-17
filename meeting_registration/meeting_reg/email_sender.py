@@ -15,7 +15,6 @@ Example:
     sender.send_mail_to_people(receivers, my_letter)
 
 Todo:
-    * Email constructor
     * Emails sent limitations like queue
 
 """
