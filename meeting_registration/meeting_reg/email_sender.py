@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List
+from .tools import parse_date, beautiful_date
 
 
 @dataclass
@@ -86,8 +87,12 @@ class EmailSender:
                            for parent in parents)
         self.send_mail_to_person(teacher["email"], self.construct_message(top + lister, header=header))
 
-    def send_alert_to_parent(self, parent, teachers):
-        header = f'Вы записались к {len(teachers)} учителями.'
-        top = f'Добрый день, {parent["parent_name"]}.\nВы записались на встречу с {len(teachers)} учителями:\n\n'
-        lister = "\n".join(f"{teacher['name']}" for teacher in teachers)
-        self.send_mail_to_person(parent["parent_email"], self.construct_message(top + lister, header=header))
+    def send_alert_to_parent(self, parent, teachers, day):
+        date = beautiful_date(*parse_date(day.date()))
+        time = day.time()
+        header = f'Регистрация на день открытых дверей {date}'
+        top = f'''   Добрый день, {parent.parent_name}.
+{date} в {time} в школе 1543 пройдет день открытых дверей.
+Вы зарегистрировались для посещения следующих учителей {parent.student_grade} класса:\n\n'''
+        lister = "\n".join(f"{teacher.name}" for teacher in teachers)
+        self.send_mail_to_person(parent.parent_email, self.construct_message(top + lister, header=header))

@@ -7,13 +7,14 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles/registration.css' %}">
     <title>{{ page_title }}</title>
 </head>
 <body>
 <div class="mx-auto registration_title container mt-2">
     <h3>Регистрация на день открытых дверей</h3>
-    <h4 class="text-muted">Гимнзия 1543 {{ date }} {{ time }}</h4>
+    <h4 class="text-muted">Гимнзия 1543 - {{ date }} - {{ time }}</h4>
 </div>
 <div class="container mb-2">
     <form method="post">
@@ -29,7 +30,7 @@
             <small id="emailHelp" class="form-text text-muted">Мы обязуемся не распростронять вашу почту</small>
         </div>
 
-        <div class="form-group">
+        <div class="form-group student_grade_group">
             <label for="{{ contact_form.student_grade.id_for_label }}">{{ contact_form.student_grade.label }}</label>
             {{ contact_form.student_grade }}
         </div>
@@ -45,7 +46,7 @@
             {% for teacher_choice_form in teacher_choice_form_set %}
                 <div class="form-group">
                     <label for="inputTeacherName">{{ teacher_choice_form.teacher_name.label }}</label>
-                    <div class="input-group teacher_name mb-3">
+                    <div class="input-group teacher_name_group mb-3">
                         {{ teacher_choice_form.teacher_name }}
                         <div class="input-group-append">
                             <button class="btn btn-danger del_this" type="button">Удалить</button>
@@ -58,7 +59,7 @@
         <div id="empty_form" style="display: none">
             <div class="form-group">
                 <label for="inputTeacherName">{{ teacher_choice_form_set.empty_form.teacher_name.label }}</label>
-                <div class="input-group teacher_name mb-3">
+                <div class="input-group teacher_name_group mb-3">
                     {{ teacher_choice_form_set.empty_form.teacher_name }}
                     <div class="input-group-append">
                         <button class="btn btn-danger shadow-none del_this" type="button">Удалить
@@ -74,11 +75,32 @@
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
 {% load static %}
-<script src="{% static 'js/bootstrap3-typeahead.js' %}"></script>
+<script src="{% static 'js/typeahead.js' %}"></script>
 <script>
 
-    {#var typehead_class = null;#}
-    var typehead_teachers = null;
+    substringMatcher = function (strs) {
+        return function findMatches(q, cb) {
+            var matches, substringRegex;
+
+            // an array that will be populated with substring matches
+            matches = [];
+
+            // regex used to determine if a string contains the substring `q`
+            substrRegex = new RegExp(q, 'i');
+
+            // iterate through the pool of strings and for any string that
+            // contains the substring `q`, add it to the `matches` array
+            $.each(strs, function (i, str) {
+                if (substrRegex.test(str)) {
+                    matches.push(str);
+                }
+            });
+
+            cb(matches);
+        };
+    };
+
+    var typeahead_teachers = null;
     add_fld = function () {
         var form_idx = $('#id_teachers-TOTAL_FORMS').val();
         $('#form_set').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
@@ -104,17 +126,33 @@
     };
 
     check_full = function () {
+        console.log(1);
         var allGood = true;
+        var used = [];
         $('#form_set').children('div').each(function () {
-            if ($(this).find('div.teacher_name input').val() === '') {
+            console.log($(this).find('div.teacher_name_group input').val());
+            let teacher_name = $(this).find('div.teacher_name_group input').val();
+            console.log(typeahead_teachers[student_grade()]);
+            console.log(teacher_name in typeahead_teachers[student_grade()])
+            if (teacher_name === '') {
                 if ($('#form_set').lastChild !== $(this)) {
                     $(this).remove();
                 }
             }
+            {#if (!(typeahead_teachers[student_grade()].includes(teacher_name))) {#}
+            {#    $(this).remove();#}
+            {#    alert("Имя учителя было введено не корректно");#}
+            {# } #}
+            if (used.includes(teacher_name)) {
+                $(this).remove();
+                alert("Вы ввели одного учителя два раза");
+            }
+            used.push(teacher_name);
         });
         if (allGood) {
             add_fld();
         }
+        update_typeahead_teachers();
     };
 
     delete_subj_from_string = function (string) {
@@ -127,9 +165,17 @@
             url: 'http://127.0.0.1:8000/classes',
             type: 'get', // This is the default though, you don't actually need to always mention it
             success: function (data) {
+                $("#student_grade").typeahead("destroy");
                 $("#student_grade").typeahead({
-                    source: data
-                });
+                        hint: false,
+                        highlight: true,
+                        minLength: 0,
+                    },
+                    {
+                        limit: 1000,
+                        name: 'data',
+                        source: substringMatcher(data)
+                    });
             }
         });
     };
@@ -139,7 +185,7 @@
             url: 'http://127.0.0.1:8000/teachers',
             type: 'get', // This is the default though, you don't actually need to always mention it
             success: function (data) {
-                typehead_teachers = data;
+                typeahead_teachers = data;
                 update_typeahead_teachers();
             }
         });
@@ -150,27 +196,70 @@
     };
 
     update_typeahead_teachers = function () {
-        if (typehead_teachers !== null) {
+        if (typeahead_teachers !== null) {
             var class_ = student_grade();
-            if (class_ in typehead_teachers) {
-                {#console.log(typehead_teachers[class_], "inside");#}
-
-
-                console.log($(".teacher_name").first().typeahead("destroy"));
-                {#$(".teacher_name").typeahead("destroy");#}
-                $(".teacher_name").typeahead({source: typehead_teachers[class_]});
+            console.log(class_);
+            if (class_ in typeahead_teachers) {
+                $(".teacher_name").typeahead("destroy");
+                $(".teacher_name").typeahead({
+                        hint: false,
+                        highlight: true,
+                        minLength: 0,
+                    },
+                    {
+                        limit: 1000,
+                        name: 'teachers',
+                        source: substringMatcher(typeahead_teachers[class_])
+                    });
             }
         }
+    };
+
+    $('#form_set').on('typeahead:selected', function (object, datum) {
+        console.log('typeahead:selected');
+        $(this).trigger('typeahead:_done', [object, datum]);
+    }).on('typeahead:autocompleted', function (object, datum) {
+        console.log('typeahead:autocompleted');
+        $(this).trigger('typeahead:_done', [object, datum]);
+    }).on('change', function () {
+        $(this).trigger('typeahead:_changed');
+    }).on('typeahead:_changed', function () {
+        console.log('typeahead:_changed');
+        check_full();
+        update_typeahead_teachers();
+    }).on('typeahead:_done', function (evt, object, datum) {
+        console.log('typeahead:_done');
+        check_full();
+        update_typeahead_teachers();
+    });
+
+    $('#student_grade').on('typeahead:selected', function (object, datum) {
+        console.log('typeahead:selected');
+        $(this).trigger('typeahead:_done', [object, datum]);
+    }).on('typeahead:autocompleted', function (object, datum) {
+        console.log('typeahead:autocompleted');
+        $(this).trigger('typeahead:_done', [object, datum]);
+    }).on('change', function () {
+        $(this).trigger('typeahead:_changed');
+    }).on('typeahead:_changed', function () {
+        console.log('typeahead:_changed');
+        update_typeahead_teachers();
+        del_all_teachers();
+    }).on('typeahead:_done', function (evt, object, datum) {
+        console.log('typeahead:_done');
+        update_typeahead_teachers();
+        del_all_teachers();
+    });
+
+
+    nahui102 = function () {
+        console.log("najui102");
     };
 
     $(document).ready(function () {
         update_typeahead_class();
         request_typeahead_teachers();
         update_typeahead_teachers();
-        $('#form_set').on('change', check_full);
-        $('#student_grade').on('change', update_typeahead_teachers);
-        $('#student_grade').on('change', del_all_teachers);
-        $('#form_set').on('change', update_typeahead_teachers);
 
         $('#form_set').on("click", '.del_this', function () {
             var block = $(this).parent().parent().parent();

@@ -19,6 +19,8 @@ from .models import Parent, Teacher, Appointment, Class, OpenDay
 from .teachers_parser import filter_teachers_by_class as filter_teachers_by_grade_parser
 from .teachers_parser import parse_teachers_schedule
 
+from .tools import beautiful_date, parse_date
+
 cfg = ConfigSecrets()
 
 data = {
@@ -56,7 +58,7 @@ def registration(request):
         teacher_choice_form_set = TeacherChoiceFormSet(prefix="teachers")
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set,
-                                                      "date": day.date(),
+                                                      "date": beautiful_date(*parse_date(day.date())[:2]),
                                                       "time": day.time(),
                                                       "page_title": "День открытых дверей 1543"})
 
@@ -88,7 +90,7 @@ def re_registration(request, token):
 
     return render(request, "registration_form.html", {"contact_form": contact_form,
                                                       "teacher_choice_form_set": teacher_choice_form_set,
-                                                      "date": day.date(),
+                                                      "date": beautiful_date(*parse_date(day.date())[:2]),
                                                       "time": day.time(),
                                                       "page_title": "День открытых дверей 1543"})
 
@@ -99,8 +101,8 @@ def send_appointments_info_to_email(parent):
                                password=cfg["mail"]["password"])
     teacher_list = []
     for appointment in Appointment.objects.filter(parent=parent):
-        teacher_list.append(model_to_dict(appointment.teacher))
-    email_sender.send_alert_to_parent(model_to_dict(parent), teacher_list)
+        teacher_list.append(appointment.teacher)
+    email_sender.send_alert_to_parent(parent, teacher_list, get_current_open_day())
 
 
 def add_appointments_to_db(cleaned_teachers_form, parent):
@@ -123,9 +125,8 @@ def strip_subject(inp_string):
     return re.sub(r"\([^)]*\)\s*", "", inp_string).strip()
 
 
-@login_required
 def all_classes(request):
-    answer = [{"name": elem.name} for elem in Class.objects.all()]
+    answer = [elem.name for elem in Class.objects.all()]
     return JsonResponse(answer, safe=False)
 
 
@@ -133,7 +134,7 @@ def all_teachers(request):
     answer = defaultdict(list)
     teachers = Teacher.objects.all()
     for teacher in teachers:
-        parsed_teacher = {"name": f"{teacher.name} ({teacher.subject})"}
+        parsed_teacher = f"{teacher.name} ({teacher.subject})"
         answer["all"].append(parsed_teacher)
         for class_ in teacher.classes.all():
             answer[class_.name].append(parsed_teacher)
@@ -142,14 +143,24 @@ def all_teachers(request):
 
 def teachers_by_grade(request, grade):
     filtered_teachers = filter_teachers_by_grade_parser(parse_teachers_schedule(), grade)
-    answer = [{"name": f'{elem["name"]} ({elem["subject"].lower()})'} for elem in filtered_teachers]
+    answer = [f'{elem["name"]} ({elem["subject"].lower()})' for elem in filtered_teachers]
     return JsonResponse(dumps(answer), safe=False)
 
 
 @login_required
-def clear_teachers_from_db(request):
+def clear_db(request):
     Teacher.objects.all().delete()
-    return HttpResponseRedirect("/manip")
+    Parent.objects.all().delete()
+    Class.objects.all().delete()
+    Appointment.objects.all().delete()
+    return HttpResponseRedirect("/panel")
+
+
+@login_required
+def new_day(request):
+    Parent.objects.all().delete()
+    Appointment.objects.all().delete()
+    return HttpResponseRedirect("/panel")
 
 
 @login_required
@@ -167,7 +178,7 @@ def upload_teachers_to_db(request):
         for class_ in teacher["list_of_classes"]:
             class_obj, _ = Class.objects.get_or_create(name=class_)
             teacher_obj.classes.add(class_obj)
-    return HttpResponseRedirect("/manip")
+    return HttpResponseRedirect("/panel")
 
 
 def create_token(length=20):
@@ -176,7 +187,7 @@ def create_token(length=20):
 
 
 @login_required
-def mailing(request):
+def teacher_mailing(request):
     email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
                                sender_email=cfg["mail"]["email_sender"],
                                password=cfg["mail"]["password"])
@@ -187,7 +198,14 @@ def mailing(request):
             parents_list.append(model_to_dict(appointment.parent))
         if teacher.email:
             email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
-    return HttpResponseRedirect("/manip")
+    return HttpResponseRedirect("/panel")
+
+
+@login_required
+def parent_mailing(request):
+    for parent in Parent.objects.all():
+        send_appointments_info_to_email(parent)
+    return HttpResponseRedirect("/panel")
 
 
 def thanks_page(request):
@@ -240,4 +258,4 @@ def appointments_dump_for_parent(request):
 
 
 def manip_panel(request):
-    return render(request, "manip/manip_panel.html", {"page_title": "Панель управления"})
+    return render(request, "panel/manip_panel.html", {"page_title": "Панель управления"})
