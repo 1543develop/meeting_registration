@@ -23,7 +23,7 @@ urlpatterns = [
     path('thanks', views.thanks_page),
     path('update/<str:token>', views.re_registration),
     path('teacher_mailing', views.teacher_mailing),
-    path('parent_mailing', views.teacher_mailing),
+    path('parent_mailing', views.parent_mailing),
     path('import', views.upload_teachers_to_db),
     path('admin', admin.site.urls),
     path('teachers', views.all_teachers),
