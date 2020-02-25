@@ -51,7 +51,7 @@ def registration(request):
             parent.token = create_token()
             parent.save()
             add_appointments_to_db(teacher_choice_form_set.cleaned_data, parent)
-            send_appointments_info_to_email(parent)
+            send_appointments_info_to_email(parent, request)
             return HttpResponseRedirect("thanks")
     else:
         contact_form = ContactForm(prefix="contacts")
@@ -69,6 +69,24 @@ def re_registration(request, token):
     if request.method == "POST":
         contact_form = ContactForm(request.POST, prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
+
+        # for form in teacher_choice_form_set:
+        #     if form.cleaned_data['teacher_name'].strip() == '':
+        #         form.instance.delete()
+        #     elif form.cleaned_data:
+        #         form.save()
+
+        # new_data = {}
+        # for key, val in teacher_choice_form_set.data.items():
+        #     print(key)
+        #     if re.match(r"teachers-[0-9]+-teacher_name", key):
+        #         if val != "":
+        #             print(val)
+        #             new_data[key] = val
+        #     else:
+        #         new_data[key] = val
+        # teacher_choice_form_set.data = new_data
+
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
             backup_form(contact_form.cleaned_data, teacher_choice_form_set.cleaned_data)
             Parent.objects.filter(token=token).delete()
@@ -77,7 +95,7 @@ def re_registration(request, token):
             parent.save()
             Appointment.objects.filter(parent=parent).delete()
             add_appointments_to_db(teacher_choice_form_set.cleaned_data, parent)
-            send_appointments_info_to_email(parent)
+            send_appointments_info_to_email(parent, request)
             return HttpResponseRedirect("/thanks")
     else:
         parent = Parent.objects.get(token=token)
@@ -85,7 +103,7 @@ def re_registration(request, token):
 
         initial_data = []
         for appointment in Appointment.objects.filter(parent=parent):
-            initial_data.append({"teacher_name": appointment.teacher.name})
+            initial_data.append({"teacher_name": f"{appointment.teacher.name} ({appointment.teacher.subject})"})
         teacher_choice_form_set = TeacherChoiceFormSet(initial=initial_data, prefix="teachers")
 
     return render(request, "registration_form.html", {"contact_form": contact_form,
@@ -95,14 +113,40 @@ def re_registration(request, token):
                                                       "page_title": "День открытых дверей 1543"})
 
 
-def send_appointments_info_to_email(parent):
+def cancel_application(request, token):
+    email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
+                               sender_email=cfg["mail"]["email_sender"],
+                               password=cfg["mail"]["password"])
+    parent = Parent.objects.all().filter(token=token)
+    if len(parent) > 0:
+        email_sender.send_cancel_application(parent[0], request.build_absolute_uri("/"))
+        Appointment.objects.all().filter(parent=parent[0]).delete()
+        parent.delete()
+        return HttpResponseRedirect("/cancellation")
+    else:
+        return HttpResponseRedirect("/cancellation_exception")
+
+
+def cancellation(request):
+    return render(request, "cancellation.html")
+
+
+def cancellation_exception(request):
+    return render(request, "cancellation_exception.html")
+
+
+def send_appointments_info_to_email(parent, request):
     email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
                                sender_email=cfg["mail"]["email_sender"],
                                password=cfg["mail"]["password"])
     teacher_list = []
     for appointment in Appointment.objects.filter(parent=parent):
         teacher_list.append(appointment.teacher)
-    email_sender.send_alert_to_parent(parent, teacher_list, get_current_open_day())
+    email_sender.send_alert_to_parent(parent,
+                                      teacher_list,
+                                      get_current_open_day(),
+                                      request.build_absolute_uri(f"/cancel/{parent.token}"),
+                                      request.build_absolute_uri(f"/update/{parent.token}"))
 
 
 def add_appointments_to_db(cleaned_teachers_form, parent):
@@ -126,7 +170,7 @@ def strip_subject(inp_string):
 
 
 def all_classes(request):
-    answer = [elem.name for elem in Class.objects.all()]
+    answer = list(sorted([elem.name for elem in Class.objects.all()], key=lambda x: (len(x), x)))
     return JsonResponse(answer, safe=False)
 
 
@@ -204,7 +248,7 @@ def teacher_mailing(request):
 @login_required
 def parent_mailing(request):
     for parent in Parent.objects.all():
-        send_appointments_info_to_email(parent)
+        send_appointments_info_to_email(parent, request)
     return HttpResponseRedirect("/panel")
 
 

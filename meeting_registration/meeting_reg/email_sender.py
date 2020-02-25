@@ -87,12 +87,23 @@ class EmailSender:
                            for parent in parents)
         self.send_mail_to_person(teacher["email"], self.construct_message(top + lister, header=header))
 
-    def send_alert_to_parent(self, parent, teachers, day):
+    def send_alert_to_parent(self, parent, teachers, day, cancel_url, re_reg_url):
         date = beautiful_date(*parse_date(day.date()))
         time = day.time()
         header = f'Регистрация на день открытых дверей {date}'
-        top = f'''   Добрый день, {parent.parent_name}.
-{date} в {time} в школе 1543 пройдет день открытых дверей.
-Вы зарегистрировались для посещения следующих учителей {parent.student_grade} класса:\n\n'''
-        lister = "\n".join(f"{teacher.name}" for teacher in teachers)
-        self.send_mail_to_person(parent.parent_email, self.construct_message(top + lister, header=header))
+        top = f"Добрый день, {parent.parent_name}.\n" \
+              f"{date} в {time} в школе 1543 пройдет день открытых дверей.\n" \
+              f"Вы зарегистрировались для посещения следующих учителей {parent.student_grade} класса:\n\n"
+        lister = "\n".join(f"{teacher.name} ({teacher.subject})" for teacher in teachers)
+        footer = f"\n\nЕсли вы хотите отвемить заявку, то, пожалуйста, перейдите по этой ссылке:\n{cancel_url}\n\n" \
+                 f"Если вы хотите изменить список учителей в заявке, то перейдите по этой ссылке:\n{re_reg_url}\n\n" \
+                 f"Искренне Ваша, Администрация 1543"
+        self.send_mail_to_person(parent.parent_email, self.construct_message(top + lister + footer, header=header))
+
+    def send_cancel_application(self, parent, url):
+        header = f"Ваша заявка на день открытых дней была удалена."
+        top = f"Добрый день, {parent.parent_name}." \
+              f"Ваша заявка на день открытых дней была удалена.\n" \
+              f"Для повторной регистрации перейдите по ссылке:\n{url}" \
+              f"Искренне Ваша, Администрация 1543."
+        self.send_mail_to_person(parent.parent_email, self.construct_message(top, header=header))

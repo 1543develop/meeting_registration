@@ -21,7 +21,10 @@ from . import views
 urlpatterns = [
     path('', views.registration),
     path('thanks', views.thanks_page),
+    path('cancellation', views.cancellation),
+    path('cancellation_exception', views.cancellation_exception),
     path('update/<str:token>', views.re_registration),
+    path('cancel/<str:token>', views.cancel_application),
     path('teacher_mailing', views.teacher_mailing),
     path('parent_mailing', views.parent_mailing),
     path('import', views.upload_teachers_to_db),

@@ -26,7 +26,7 @@ def parse_date(date):
 
 
 def beautiful_date(day=None, month=None, year=None):
-    return " ".join([str(x) for x in (day, months_genitive[month + 1], year) if x is not None])
+    return " ".join([str(x) for x in (day, months_genitive[month - 1], year) if x is not None])
 
 
 if __name__ == '__main__':

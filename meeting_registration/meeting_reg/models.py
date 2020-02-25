@@ -29,7 +29,7 @@ class Teacher(models.Model):
 
 
 class Parent(models.Model):
-    token = models.CharField(max_length=100)
+    token = models.CharField(max_length=100, unique=True)
     parent_name = models.CharField(max_length=100)
     parent_email = models.EmailField(max_length=100)
     student_grade = models.CharField(max_length=10)
