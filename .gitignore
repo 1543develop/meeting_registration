@@ -3,3 +3,4 @@ meeting_registration/meeting_reg/config_secrets.json
 .idea
 meeting_registration/db.sqlite3
 meeting_registration/meeting_reg/teachers.txt
+meeting_registration/meeting_reg/teachers_schedule.xlsx

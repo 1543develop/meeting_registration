@@ -3,21 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ page_title }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+            integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+
 </head>
 <body>
-<h3>Доступные команды:</h3>
-<ul>
-    <li><a href="/teachers_dump">Дамп учителей</a></li>
-    <li><a href="/parents_dump">Дамп родителей</a></li>
-    <li><a href="/teacher_mailing">Рассылка учителей</a></li>
-    <li><a href="/parent_mailing">Рассылка родителей</a></li>
-    <li><a href="/clear_appointments">Стереть родителей и встречи</a></li>
-    <li>Чтобы случайно не нажать две нижнии ссылки</li>
-    <li>Чтобы случайно не нажать две нижнии ссылки</li>
-    <li>Чтобы случайно не нажать две нижнии ссылки</li>
-    <li><a href="/import">Импортировать учителей (Не нажимать)</a></li>
-    <li><a href="/clear">Стереть учителей (Не нажимать)</a></li>
-</ul>
-<a href="/accounts/logout">Разлогиниться</a>
+<div class="container">
+    <h3>Доступные команды:</h3>
+    <ul class="list-group">
+        <li class="list-group-item"><a href="/teachers_dump">Дамп учителей</a> <a href="/teachers_dump_with_emails">(с адресами электронной почты)</a></li>
+        <li class="list-group-item"><a href="/parents_dump">Дамп родителей</a></li>
+        <li class="list-group-item "><a href="" class="text-danger" data-toggle="modal"
+                                        data-target="#teacher_mailingModel">Рассылка учителей</a></li>
+        <li class="list-group-item"><a href="" class="text-danger" data-toggle="modal"
+                                       data-target="#parent_mailingModel">Рассылка родителей</a></li>
+        <li class="list-group-item"><a href="" class="text-danger" data-toggle="modal"
+                                       data-target="#clear_parentsModel">Стереть родителей и встречи</a></li>
+        <li class="list-group-item"><a href="" class="text-danger" data-toggle="modal"
+                                       data-target="#import_teachersModel">Импортировать учителей</a>
+        </li>
+        <li class="list-group-item"><a href="" class="text-danger" data-toggle="modal"
+                                       data-target="#clear_teachersModel">Стереть учителей</a></li>
+        <li class="list-group-item"><a href="" data-toggle="modal" data-target="#logoutModel">Разлогиниться</a>
+        </li>
+    </ul>
+
+    <div class="modal fade" id="teacher_mailingModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите разослать письма о собрании всем учителям?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-danger text-light" href="/teacher_mailing">Разослать</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="parent_mailingModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите разослать письма о собрании всем родителям?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-danger text-light" href="/parent_mailing">Разослать</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="clear_parentsModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите стереть всех родителей и встречи из базы данных?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-danger text-light" href="/clear_appointments">Стереть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="import_teachersModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите импортировать учителей?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-danger text-light" href="/import">Импортировать</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="clear_teachersModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите стереть всех учителей из базы данных?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-danger text-light" href="/clear">Стереть</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="logoutModel" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Предупреждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы уверены, что хотите разлогиниться?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary">Нет</button>
+                    <a role="button" class="btn btn-primary text-light" href="/accounts/logout">Разлогиниться</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 </body>
+<script>
+    $('#myModal').on('shown.bs.modal', function () {
+        $('#myInput').trigger('focus')
+    })
+</script>
 </html>

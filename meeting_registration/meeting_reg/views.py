@@ -70,23 +70,6 @@ def re_registration(request, token):
         contact_form = ContactForm(request.POST, prefix="contacts")
         teacher_choice_form_set = TeacherChoiceFormSet(request.POST, prefix="teachers")
 
-        # for form in teacher_choice_form_set:
-        #     if form.cleaned_data['teacher_name'].strip() == '':
-        #         form.instance.delete()
-        #     elif form.cleaned_data:
-        #         form.save()
-
-        # new_data = {}
-        # for key, val in teacher_choice_form_set.data.items():
-        #     print(key)
-        #     if re.match(r"teachers-[0-9]+-teacher_name", key):
-        #         if val != "":
-        #             print(val)
-        #             new_data[key] = val
-        #     else:
-        #         new_data[key] = val
-        # teacher_choice_form_set.data = new_data
-
         if contact_form.is_valid() and teacher_choice_form_set.is_valid():
             backup_form(contact_form.cleaned_data, teacher_choice_form_set.cleaned_data)
             Parent.objects.filter(token=token).delete()
@@ -257,27 +240,28 @@ def thanks_page(request):
     return render(request, "thanks.html")
 
 
-def create_html_table_from_teachers_dump(dump: defaultdict):
+def create_html_table_from_teachers_dump(dump: defaultdict, with_emails):
     html = """<html><table border="1"><tr><th>Учитель</th><th>Родитель</th></tr>"""
     for (teacher_name, parents) in dump.items():
         html += f"<tr><td>{teacher_name}</td>"
         html += f"<td>"
         for parent in parents:
-            html += f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']})<br>"
+            html += f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']}) {parent['parent_email'] if with_emails else ''}<br>"
         html += f"</td></tr>"
     html += "</table></html>"
     return html
 
 
 @login_required
-def appointments_dump_for_teachers(request):
+def appointments_dump_for_teachers(request, with_emails=False):
     dump = defaultdict(list)
     for teacher in Teacher.objects.all():
         for appointment in Appointment.objects.filter(teacher=teacher):
             dump[teacher.name].append({"parent_name": appointment.parent.parent_name,
                                        "student_name": appointment.parent.student_name,
-                                       "student_grade": appointment.parent.student_grade})
-    return HttpResponse(create_html_table_from_teachers_dump(dump))
+                                       "student_grade": appointment.parent.student_grade,
+                                       "parent_email": appointment.parent.parent_email})
+    return HttpResponse(create_html_table_from_teachers_dump(dump, with_emails))
 
 
 def create_html_table_from_parents_dump(dump: defaultdict):

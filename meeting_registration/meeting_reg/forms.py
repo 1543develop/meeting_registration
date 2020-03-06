@@ -15,6 +15,7 @@ DEFAULT_MIN_NUM = 0
 # default maximum number of forms in a formset, to prevent memory exhaustion
 DEFAULT_MAX_NUM = 1000
 
+
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Parent
