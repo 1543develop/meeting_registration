@@ -17,8 +17,8 @@
     <h4 class="text-muted">Гимназия 1543 - {{ date }} - {{ time }}</h4>
 </div>
 <div class="container mb-2">
-    {{ teacher_choice_form_set.errors }}
-    {{ teacher_choice_form_set.non_field_errors }}
+{#    {{ teacher_choice_form_set.errors }}#}
+{#    {{ teacher_choice_form_set.non_field_errors }}#}
     <form method="post">
         {% csrf_token %}
         <div class="form-group">

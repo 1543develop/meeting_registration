@@ -73,32 +73,36 @@ class EmailSender:
             self.send_mail_to_person(email, message)
 
     @staticmethod
-    def construct_message(text, header=None, encoding="utf-8"):
+    def construct_message(text, header=None, receiver=None, encoding="utf-8"):
         message = MIMEMultipart("alternative")
         msg_text = MIMEText(text, "plain", encoding)
         message["Subject"] = header
+        message["To"] = receiver
         message.attach(msg_text)
         return message
 
-    def send_alert_to_teacher(self, teacher, parents):
-        header = f'К вами записалось {len(parents)} родителей.\n'
+    def send_alert_to_teacher(self, teacher, parents, day):
+        date = beautiful_date(*parse_date(day.date()))
+        time = day.time()
+        header = f'Регистрация на день открытых дверей {date}.'
         top = f'Добрый день, {teacher["name"]}.\nНа встречу с вами записалось {len(parents)} родителей:\n\n'
         lister = "\n".join(f"{parent['parent_name']} ({parent['student_name']}, {parent['student_grade']})"
                            for parent in parents)
-        self.send_mail_to_person(teacher["email"], self.construct_message(top + lister, header=header))
+        self.send_mail_to_person(teacher["email"],
+                                 self.construct_message(top + lister, header=header, receiver=teacher.email))
 
-    def send_alert_to_parent(self, parent, teachers, day, cancel_url, re_reg_url):
+    def send_alert_to_parent(self, parent, teachers, day, cancel_url, re_reg_url, is_reminder=False):
         date = beautiful_date(*parse_date(day.date()))
         time = day.time()
         header = f'Регистрация на день открытых дверей {date}'
         top = f"Добрый день, {parent.parent_name}.\n" \
-              f"{date} в {time} в школе 1543 пройдет день открытых дверей.\n" \
+              f"{'Напоминаем вам, что ' if is_reminder else ''}{date} в {time} в школе 1543 пройдет день открытых дверей.\n" \
               f"Вы зарегистрировались для посещения следующих учителей {parent.student_grade} класса:\n\n"
         lister = "\n".join(f"{teacher.name} ({teacher.subject})" for teacher in teachers)
-        footer = f"\n\nЕсли вы хотите отвемить заявку, то, пожалуйста, перейдите по этой ссылке:\n{cancel_url}\n\n" \
-                 f"Если вы хотите изменить список учителей в заявке, то перейдите по этой ссылке:\n{re_reg_url}\n\n" \
+        footer = f"\n\nЕсли вы хотите отменить заявку, то, пожалуйста, перейдите по этой ссылке:\n{cancel_url}\n\n" \
                  f"Искренне Ваша, Администрация 1543"
-        self.send_mail_to_person(parent.parent_email, self.construct_message(top + lister + footer, header=header))
+        self.send_mail_to_person(parent.parent_email, self.construct_message(top + lister + footer, header=header,
+                                                                             receiver=parent.parent_email))
 
     def send_cancel_application(self, parent, url):
         header = f"Ваша заявка на день открытых дней была удалена."
@@ -106,4 +110,5 @@ class EmailSender:
               f"Ваша заявка на день открытых дней была удалена.\n" \
               f"Для повторной регистрации перейдите по ссылке:\n{url}" \
               f"Искренне Ваша, Администрация 1543."
-        self.send_mail_to_person(parent.parent_email, self.construct_message(top, header=header))
+        self.send_mail_to_person(parent.parent_email,
+                                 self.construct_message(top, header=header, receiver=parent.parent_email))

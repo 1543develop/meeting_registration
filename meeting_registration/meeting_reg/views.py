@@ -135,7 +135,7 @@ def cancellation_exception(request):
     return render(request, "cancellation_exception.html")
 
 
-def send_appointments_info_to_email(parent, request):
+def send_appointments_info_to_email(parent, request, is_reminder=False):
     email_sender = EmailSender(smtp_server_address=cfg["mail"]["stmp_server"],
                                sender_email=cfg["mail"]["email_sender"],
                                password=cfg["mail"]["password"])
@@ -146,7 +146,8 @@ def send_appointments_info_to_email(parent, request):
                                       teacher_list,
                                       get_current_open_day(),
                                       request.build_absolute_uri(f"/cancel/{parent.token}"),
-                                      request.build_absolute_uri(f"/update/{parent.token}"))
+                                      request.build_absolute_uri(f"/update/{parent.token}"),
+                                      is_reminder=is_reminder)
 
 
 def add_appointments_to_db(cleaned_teachers_form, parent):
@@ -240,15 +241,15 @@ def teacher_mailing(request):
         appointments = Appointment.objects.filter(teacher=teacher)
         for appointment in appointments:
             parents_list.append(model_to_dict(appointment.parent))
-        if teacher.email:
-            email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list)
+        if teacher.email and len(Appointment.objects.filter(teacher=teacher)):
+            email_sender.send_alert_to_teacher(model_to_dict(teacher), parents_list, get_current_open_day())
     return HttpResponseRedirect("/panel")
 
 
 @login_required
 def parent_mailing(request):
     for parent in Parent.objects.all():
-        send_appointments_info_to_email(parent, request)
+        send_appointments_info_to_email(parent, request, is_reminder=True)
     return HttpResponseRedirect("/panel")
 
 

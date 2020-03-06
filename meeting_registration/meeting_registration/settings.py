@@ -137,4 +137,4 @@ USE_TZ = True
 STATICFILES_DIRS = ['meeting_reg/static']
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = '/manip_panel'
+LOGIN_REDIRECT_URL = '/panel'
